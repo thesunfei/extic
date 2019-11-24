@@ -1,7 +1,7 @@
 {
   "name": "extic",
-  "version": "1.1.2",
-  "description": "A simple static server powered by Express.js",
+  "version": "1.1.3",
+  "description": "A configurable static web server powered by Express.js",
   "main": "./bin/index.js",
   "preferGlobal": true,
   "scripts": {
@@ -19,5 +19,11 @@
     "express": "^4.17.1",
     "mime": "^2.4.4",
     "yargs": "^15.0.2"
-  }
+  },
+  "homepage": "https://github.com/thesunfei/extic",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thesunfei/extic.git"
+  },
+  "keywords": ["static","web","server","express.js"]
 }
