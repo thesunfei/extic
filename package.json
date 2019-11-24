@@ -1,0 +1,23 @@
+{
+  "name": "extic",
+  "version": "1.1.2",
+  "description": "A simple static server powered by Express.js",
+  "main": "./bin/index.js",
+  "preferGlobal": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "extic": "./bin/index.js"
+  },
+  "author": {
+    "name": "Fei Sun",
+    "email": "thesunfei@gmail.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mime": "^2.4.4",
+    "yargs": "^15.0.2"
+  }
+}
