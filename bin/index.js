@@ -24,7 +24,7 @@ const app = express();
 const platform = os.type();
 const pathSplit = platform == 'Windows_NT' ? '\\' : '/';
 config.ports.forEach(port => {
-    app.get('*', (req, res) => {
+    app.all('*', (req, res) => {
         var matched = false;
         port.sites.forEach(site => {
             let basePath=site.basePath||"/";
@@ -32,7 +32,7 @@ config.ports.forEach(port => {
                 matched = true;
                 fs.readFile(site.dir + req.path.replace(basePath.replace(/\/$/,""),""), (err, data) => {
                     if (err) {
-                        fs.readFile(path.normalize(site.dir + pathSplit + site.index), 'utf8', (err, data) => {
+                        fs.readFile(path.normalize(site.dir + pathSplit + site.index), (err, data) => {
                             if (err) {
                                 res.type('html');
                                 res.status(404).send('Index File Not Found');
@@ -42,7 +42,7 @@ config.ports.forEach(port => {
                             }
                         });
                     } else {
-                        res.type(mime.getType(path.normalize(site.dir + pathSplit + req.path.replace(/\//g, pathSplit))));
+                        res.type(mime.getType(path.normalize(site.dir + pathSplit + req.path.replace(/\//g, pathSplit)))||"text/plain");
                         res.send(data);
                     }
                 });
