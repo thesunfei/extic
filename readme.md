@@ -32,6 +32,7 @@ module.exports = {
                 index: "index.html"
             }
         ],
+        protocol: "http",
         port: 80
     },
     {
@@ -49,7 +50,12 @@ module.exports = {
                 index: "index.html"
             }
         ],
-        port: 81
+        protocol: "https",
+        cert: {
+            key: "c:\\sites\\certs\\web.key",
+            cert: "c:\\sites\\certs\\web.crt"
+        },
+        port: 443
     }]
 }
 
@@ -87,7 +93,12 @@ module.exports = {
                 index: "index.html"
             }
         ],
-        port: 81
+        protocol: "https",
+        cert: {
+            key: "/home/web/web.key",
+            cert: "/home/web/web.crt"
+        },
+        port: 443
     }]
 }
 ```
