@@ -80,7 +80,7 @@ config.ports.forEach(port => {
         }
         port.sites.forEach(site => {
             console.log(site.name+" running on:");
-            console.log(site.domains.map(v=>port.protocol+"://"+v+":"+port.port).join(', '));
+            console.log(site.domains.map(v=>(port.protocol||"http")+"://"+v+":"+port.port).join(', '));
         });
     } catch (e) {
         console.error(e);
