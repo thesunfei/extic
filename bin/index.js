@@ -29,7 +29,12 @@ const pathSplit = platform == 'Windows_NT' ? '\\' : '/';
 app.all('*', function (req, res) {
     var port;
     var host = req.get("host");
-    if (host.replace(req.hostname,"") != "") {
+    if (!host) {
+        console.error("Bad request with no host header,from client ip: " + req.ip + ",url: " + req.protocol + "://" + req.hostname + ":" + port + req.originalUrl);
+        req.status(400).send("Bad Request");
+        return;
+    }
+    if (host.replace(req.hostname, "") != "") {
         port = host.split(":")[1]
     } else {
         if (req.protocol == "http") {
@@ -38,9 +43,13 @@ app.all('*', function (req, res) {
             port = 443;
         }
     }
+    if (config.log) {
+        console.log(new Date().toLocaleString()+", Got request from ip " + req.ip + ", url:" + req.protocol + "://" + req.hostname + ":" + port + req.originalUrl);
+    }
     var matched = false;
     if (config.ports.find(v => v.port == port)) {
         config.ports.find(v => v.port == port).sites.forEach(site => {
+            if (matched) return;
             let basePath = site.basePath || "/";
             if (site.domains.includes(req.hostname) && (new RegExp("^" + basePath.replace(/\/$/, "") + "\/").test(req.path) || req.path == basePath || req.path == basePath.replace(/\/$/, ""))) {
                 matched = true;
@@ -75,12 +84,12 @@ config.ports.forEach(port => {
         } else if (port.protocol == "https") {
             https.createServer({
                 key: fs.readFileSync(port.cert.key),
-                cert: fs.readFileSync(port.cert.cert)
+                cert: fs.readFileSync(port.cert.cert || port.cert.crt)
             }, app).listen(port.port);
         }
         port.sites.forEach(site => {
-            console.log(site.name+" running on:");
-            console.log(site.domains.map(v=>(port.protocol||"http")+"://"+v+":"+port.port).join(', '));
+            console.log(site.name + " running on:");
+            console.log(site.domains.map(v => (port.protocol || "http") + "://" + v + ":" + port.port).join(', '));
         });
     } catch (e) {
         console.error(e);

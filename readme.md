@@ -33,7 +33,8 @@ module.exports = {
             }
         ],
         protocol: "http",
-        port: 80
+        port: 80,
+        log: false
     },
     {
         sites: [{
@@ -55,7 +56,8 @@ module.exports = {
             key: "c:\\sites\\certs\\web.key",
             cert: "c:\\sites\\certs\\web.crt"
         },
-        port: 443
+        port: 443,
+        log: false
     }]
 }
 
@@ -76,7 +78,8 @@ module.exports = {
                 index: "index.html"
             }
         ],
-        port: 80
+        port: 80,
+        log: false
     },
     {
         sites: [{
@@ -98,7 +101,8 @@ module.exports = {
             key: "/home/web/web.key",
             cert: "/home/web/web.crt"
         },
-        port: 443
+        port: 443,
+        log: false
     }]
 }
 ```
