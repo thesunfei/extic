@@ -30,7 +30,7 @@ app.all('*', function (req, res) {
     var port;
     var host = req.get("host");
     if (!host) {
-        console.error("Bad request with no host header,from client ip: " + req.ip + ",url: " + req.protocol + "://" + req.hostname + ":" + port + req.originalUrl);
+        console.error("Bad request with no host header,from client ip: " + req.ip + ",URL: " + req.protocol + "://" + host + req.originalUrl);
         req.status(400).send("Bad Request");
         return;
     }
@@ -44,7 +44,7 @@ app.all('*', function (req, res) {
         }
     }
     if (config.log) {
-        console.log(new Date().toLocaleString()+", Got request from ip " + req.ip + ", url:" + req.protocol + "://" + req.hostname + ":" + port + req.originalUrl);
+        console.log(new Date().toLocaleString()+", Got request from ip " + req.ip + ", URL:" + req.protocol + "://" + host + req.originalUrl);
     }
     var matched = false;
     if (config.ports.find(v => v.port == port)) {
