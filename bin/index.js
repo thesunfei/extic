@@ -31,7 +31,7 @@ app.all('*', function (req, res) {
     var host = req.get("host");
     if (!host) {
         console.error("Bad request with no host header,from client ip: " + req.ip + ",URL: " + req.protocol + "://" + host + req.originalUrl);
-        req.status(400).send("Bad Request");
+        res.status(400).send("Bad Request");
         return;
     }
     if (host.replace(req.hostname, "") != "") {
