@@ -29,8 +29,12 @@ const pathSplit = platform == 'Windows_NT' ? '\\' : '/';
 app.all('*', function (req, res) {
     var port;
     var host = req.get("host");
+    if (req.originalUrl.includes("/..")) {
+        console.warn("Directory traversal attack detected! From ip: " + req.ip + ",URL: " + req.protocol + "://" + host + req.originalUrl);
+        return;
+    }
     if (!host) {
-        console.error("Bad request with no host header,from client ip: " + req.ip + ",URL: " + req.protocol + "://" + host + req.originalUrl);
+        console.error("Bad request with no host header,from ip: " + req.ip + ",URL: " + req.protocol + "://" + host + req.originalUrl);
         res.status(400).send("Bad Request");
         return;
     }
@@ -44,7 +48,7 @@ app.all('*', function (req, res) {
         }
     }
     if (config.log) {
-        console.log(new Date().toLocaleString()+", Got request from ip " + req.ip + ", URL:" + req.protocol + "://" + host + req.originalUrl);
+        console.log(new Date().toLocaleString() + ", Got request from ip " + req.ip + ", URL:" + req.protocol + "://" + host + req.originalUrl);
     }
     var matched = false;
     if (config.ports.find(v => v.port == port)) {
