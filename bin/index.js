@@ -20,7 +20,7 @@ const options = yargs
 try {
     var config = require(options.config);
 } catch (e) {
-    console.error(e.code + ':' + options.config || "''");
+    console.error(e + ':' + options.config || "''");
     return;
 }
 const app = express();
