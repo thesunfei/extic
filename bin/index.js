@@ -47,13 +47,41 @@ app.all('*', function (req, res) {
             port = 443;
         }
     }
-    if (config.log) {
-        console.log(new Date().toLocaleString() + ", Got request from ip " + req.ip + ", URL:" + req.protocol + "://" + host + req.originalUrl);
-    }
     var matched = false;
-    if (config.ports.find(v => v.port == port)) {
+    if (config.ports.some(v => v.port == port)) {
         config.ports.find(v => v.port == port).sites.forEach(site => {
             if (matched) return;
+            if (site.log) {
+                console.log(new Date().toLocaleString() + ", Got request from ip " + req.ip + ", URL:" + req.protocol + "://" + host + req.originalUrl);
+            }
+            if (site.proxy) {
+                if (site.proxy.path.test(req.path)) {
+                    console.log(req.method);
+                    let requestClient;
+                    if (/^http:/.test(site.proxy.url)) {
+                        requestClient = http;
+                    } else if (/^https:/.test(site.proxy.url)) {
+                        requestClient = https;
+                    }
+                    requestClient.get(site.proxy.url + req.originalUrl, {
+                        headers: req.headers
+                    }, r => {
+                        r.rawHeaders.forEach((item, index) => {
+                            if (index % 2 == 0) {
+                                res.append(item, r.rawHeaders[index + 1])
+                            }
+                        })
+                        r.on('data', dt => {
+                            res.write(dt)
+                        })
+                        r.on('end', () => {
+                            res.end();
+                        })
+                    })
+                    matched = true;
+                    return
+                }
+            }
             let basePath = site.basePath || "/";
             if (site.domains.includes(req.hostname) && (new RegExp("^" + basePath.replace(/\/$/, "") + "\/").test(req.path) || req.path == basePath || req.path == basePath.replace(/\/$/, ""))) {
                 matched = true;

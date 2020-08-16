@@ -23,7 +23,11 @@ module.exports = {
                 domains: ["test1.com", "www.test1.com"],
                 dir: "c:\\sites\\test1",
                 basePath:"/admin",
-                index: "index.html"
+                index: "index.html",
+                proxy: {
+                    path: /^(\/api|\/expand)/,
+                    url: "https://www.test.com"
+                }
             },
             {
                 name: "test2",
@@ -34,7 +38,7 @@ module.exports = {
         ],
         protocol: "http",
         port: 80,
-        log: false
+        log: true
     },
     {
         sites: [{
@@ -57,7 +61,7 @@ module.exports = {
             cert: "c:\\sites\\certs\\web.crt"
         },
         port: 443,
-        log: false
+        log: true
     }]
 }
 
@@ -79,7 +83,7 @@ module.exports = {
             }
         ],
         port: 80,
-        log: false
+        log: true
     },
     {
         sites: [{
@@ -102,7 +106,7 @@ module.exports = {
             cert: "/home/web/web.crt"
         },
         port: 443,
-        log: false
+        log: true
     }]
 }
 ```
