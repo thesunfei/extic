@@ -1,4 +1,17 @@
 ## **extic**
+```
+A simple configurable static http and https server powered by Express.js,supported proxy, custom headers and frontend router.
+```
+
+## Change logs
+```
+v1.4.2: 
+Colorful console output supported;
+Relative path for config file and server files supported;
+Custom headers supported;
+Log is now enalbed by default;
+
+```
 
 ## Install
 ```
@@ -10,86 +23,39 @@ npm i -g extic
 extic -c <config>
 
 example:
-extic -c c:\web\config.js
+extic -c ./web/config.js
 ```
 
 ### Config file examples
 ```
-For Windows:
-module.exports = {
-    ports: [{
-        sites: [{
-                name: "test1",
-                domains: ["test1.com", "www.test1.com"],
-                dir: "c:\\sites\\test1",
-                basePath:"/admin",
-                index: "index.html",
-                proxy: {
-                    path: /^(\/api|\/expand)/,
-                    url: "https://www.test.com"
-                }
-            },
-            {
-                name: "test2",
-                domains: ["test2.com", "www.test2.com"],
-                dir: "c:\\sites\\test1",
-                index: "index.html"
-            }
-        ],
-        protocol: "http",
-        port: 80,
-        log: true
-    },
-    {
-        sites: [{
-                name: "test3",
-                domains: ["test3.com", "www.test3.com"],
-                dir: "c:\\sites\\test3",
-                basePath:"/admin",
-                index: "index.html"
-            },
-            {
-                name: "test4",
-                domains: ["test4.com", "www.test4.com"],
-                dir: "c:\\sites\\test4",
-                index: "index.html"
-            }
-        ],
-        protocol: "https",
-        cert: {
-            key: "c:\\sites\\certs\\web.key",
-            cert: "c:\\sites\\certs\\web.crt"
-        },
-        port: 443,
-        log: true
-    }]
-}
 
-For Linux:
 module.exports = {
     ports: [{
         sites: [{
-                name: "test1",
+                name: "test1",//The name of you website
                 domains: ["test1.com", "www.test1.com"],
-                dir: "/home/web/test1",
-                basePath:"/admin",
-                index: "index.html"
+                dir: "/home/web/test1", //The root path of your website files
+                basePath:"/admin", //The root path of the website URL.
+                index: "index.html", //For frontend router usage.
+                headers:{ //Custom response headers
+                    test:"test"
+                },
+                log:true //Whether to output user visit logs in console.Default is true.
             },
             {
                 name: "test2",
                 domains: ["test2.com", "www.test2.com"],
-                dir: "/home/web/test2",
+                dir: "../web/test2",//The path is relative to the directory of the config file
                 index: "index.html"
             }
         ],
-        port: 80,
-        log: true
+        port: 80
     },
     {
         sites: [{
                 name: "test3",
                 domains: ["test3.com", "www.test3.com"],
-                dir: "/home/web/test3",
+                dir: "./web/test3",
                 basePath:"/admin",
                 index: "index.html"
             },
@@ -102,11 +68,10 @@ module.exports = {
         ],
         protocol: "https",
         cert: {
-            key: "/home/web/web.key",
-            cert: "/home/web/web.crt"
+            key: "../certs/web.key", //The path is relative to the directory of the config file
+            cert: "/home/certs/web.crt"
         },
-        port: 443,
-        log: true
+        port: 443
     }]
 }
 ```

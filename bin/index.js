@@ -4,6 +4,7 @@ const fs = require('fs');
 const mime = require('mime');
 const yargs = require('yargs');
 const path = require('path');
+const chalk = require('chalk');
 const os = require('os');
 const express = require('express');
 const http = require('http');
@@ -17,24 +18,26 @@ const options = yargs
         demandOption: true
     })
     .argv;
+const configPath = path.resolve(options.config);
+const configPathParsed = path.parse(configPath);
+const configDir = configPathParsed.dir;
 try {
-    var config = require(options.config);
+    var config = require(configPath);
 } catch (e) {
-    console.error(e + ':' + options.config || "''");
+    console.error(chalk.redBright(e + ':' + options.config || "''"));
     return;
 }
 const app = express();
-const platform = os.type();
-const pathSplit = platform == 'Windows_NT' ? '\\' : '/';
 app.all('*', function (req, res) {
     var port;
     var host = req.get("host");
+    res.setHeader("server", "extic");
     if (req.originalUrl.includes("/..")) {
-        console.warn("Directory traversal attack detected! From ip: " + req.ip + ",URL: " + req.protocol + "://" + host + req.originalUrl);
+        console.warn(chalk.yellowBright("Directory traversal attack detected! From ip: " + req.ip + ",URL: " + req.protocol + "://" + host + req.originalUrl));
         return;
     }
     if (!host) {
-        console.error("Bad request with no host header,from ip: " + req.ip + ",URL: " + req.protocol + "://" + host + req.originalUrl);
+        console.warn(chalk.yellowBright("Bad request with no host header,from ip: " + req.ip + ",URL: " + req.protocol + "://" + host + req.originalUrl));
         res.status(400).send("Bad Request");
         return;
     }
@@ -51,12 +54,16 @@ app.all('*', function (req, res) {
     if (config.ports.some(v => v.port == port)) {
         config.ports.find(v => v.port == port).sites.forEach(site => {
             if (matched) return;
-            if (site.log) {
-                console.log(new Date().toLocaleString() + ", Got request from ip " + req.ip + ", URL:" + req.protocol + "://" + host + req.originalUrl);
+            if (site.headers) {
+                for (let name in site.headers) {
+                    res.setHeader(name, site.headers[name]);
+                }
+            };
+            if (site.log || site.log === undefined) {
+                console.log(chalk.greenBright(new Date().toLocaleString() + ", Got request from ip " + req.ip + ", URL: " + req.protocol + "://" + host + req.originalUrl));
             }
             if (site.proxy) {
                 if (site.proxy.path.test(req.path)) {
-                    console.log(req.method);
                     let requestClient;
                     if (/^http:/.test(site.proxy.url)) {
                         requestClient = http;
@@ -77,6 +84,7 @@ app.all('*', function (req, res) {
                         r.on('end', () => {
                             res.end();
                         })
+                        console.log(chalk.green("Proxy operation finished."));
                     })
                     matched = true;
                     return
@@ -85,9 +93,9 @@ app.all('*', function (req, res) {
             let basePath = site.basePath || "/";
             if (site.domains.includes(req.hostname) && (new RegExp("^" + basePath.replace(/\/$/, "") + "\/").test(req.path) || req.path == basePath || req.path == basePath.replace(/\/$/, ""))) {
                 matched = true;
-                fs.readFile(site.dir + req.path.replace(basePath.replace(/\/$/, ""), ""), (err, data) => {
+                fs.readFile(path.resolve(configDir, site.dir + req.path.replace(basePath.replace(/\/$/, ""), "")), (err, data) => {
                     if (err) {
-                        fs.readFile(path.normalize(site.dir + pathSplit + site.index), (err, data) => {
+                        fs.readFile(path.resolve(configDir, site.dir + "/" + site.index), (err, data) => {
                             if (err) {
                                 res.type('html');
                                 res.status(404).send('Index File Not Found');
@@ -97,7 +105,7 @@ app.all('*', function (req, res) {
                             }
                         });
                     } else {
-                        res.type(mime.getType(path.normalize(site.dir + pathSplit + req.path.replace(/\//g, pathSplit))) || "text/plain");
+                        res.type(mime.getType(path.resolve(configDir, site.dir + "/" + req.path)) || "text/plain");
                         res.send(data);
                     }
                 });
@@ -111,19 +119,19 @@ app.all('*', function (req, res) {
 });
 config.ports.forEach(port => {
     try {
-        if (port.protocol == "http" || port.protocol == undefined) {
+        if ((port.protocol || "").toLowerCase().trim() == "http" || port.protocol === undefined) {
             http.createServer(app).listen(port.port);
-        } else if (port.protocol == "https") {
+        } else if ((port.protocol || "").toLowerCase().trim() == "https") {
             https.createServer({
-                key: fs.readFileSync(port.cert.key),
-                cert: fs.readFileSync(port.cert.cert || port.cert.crt)
+                key: fs.readFileSync(path.resolve(configDir, port.cert.key)),
+                cert: fs.readFileSync(path.resolve(configDir, port.cert.cert || port.cert.crt))
             }, app).listen(port.port);
         }
         port.sites.forEach(site => {
-            console.log(site.name + " running on:");
-            console.log(site.domains.map(v => (port.protocol || "http") + "://" + v + ":" + port.port).join(', '));
+            console.log(chalk.greenBright(site.name + " running on:"));
+            console.log(chalk.greenBright(site.domains.map(v => (port.protocol || "http") + "://" + v + ":" + port.port).join(', ')));
         });
     } catch (e) {
-        console.error(e);
+        console.error(chalk.redBright(e));
     }
 });
