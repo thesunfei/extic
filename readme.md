@@ -5,11 +5,13 @@ A simple configurable static http and https server powered by Express.js,support
 
 ## Change logs
 ```
+v1.4.3:
+Proxy bug fixed; 
 v1.4.2: 
 Colorful console output supported;
 Relative path for config file and server files supported;
 Custom headers supported;
-Log is now enalbed by default;
+Log is now enabled by default;
 
 ```
 
@@ -40,6 +42,14 @@ module.exports = {
                 headers:{ //Custom response headers
                     test:"test"
                 },
+                proxy: [{
+                        path: /^(\/admin\/api|\/admin\/expand)/,
+                        url: "https://www.google.com"
+                    },
+                    {
+                        path: /^(\/admin\/test1|\/admin\/test2)/,
+                        url: "https://www.bing.com"
+                }],
                 log:true //Whether to output user visit logs in console.Default is true.
             },
             {
