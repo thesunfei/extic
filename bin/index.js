@@ -28,6 +28,10 @@ try {
     return;
 }
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({
+    extended: true
+}));
 app.all('*', function (req, res) {
     var port;
     var host = req.get("host");
@@ -71,13 +75,15 @@ app.all('*', function (req, res) {
                     for (let proxy of site.proxy) {
                         if (proxy.path.test(req.path)) {
                             let requestClient;
-                            if (/^http:/.test(proxy.url)) {
+                            if (/^http:/i.test(proxy.url)) {
                                 requestClient = http;
-                            } else if (/^https:/.test(proxy.url)) {
+                            } else if (/^https:/i.test(proxy.url)) {
                                 requestClient = https;
                             }
                             delete req.headers.host;
-                            requestClient.get(proxy.url + req.originalUrl, {
+                            // console.log(req.body);
+                            let proxyRequet = requestClient.request(proxy.url + req.originalUrl, {
+                                method: req.method,
                                 headers: req.headers
                             }, r => {
                                 r.rawHeaders.forEach((item, index) => {
@@ -86,17 +92,26 @@ app.all('*', function (req, res) {
                                     }
                                 })
                                 r.on('data', dt => {
-                                    res.write(dt)
+                                    res.write(dt);
                                 })
                                 r.on('end', () => {
                                     res.end();
+                                    console.log(chalk.green("Proxy operation finished."));
                                 })
-                                console.log(chalk.green("Proxy operation finished."));
+                                r.on('error', e => {
+                                    res.end();
+                                    // console.log(e)
+                                })
                             })
+                            if (req.method.toLowerCase() !== "get") {
+                                proxyRequet.write(JSON.stringify(req.body));
+                            }
+                            proxyRequet.end();
                             matched = true;
                             return
                         }
                     }
+
                 }
                 matched = true;
                 fs.readFile(path.resolve(configDir, site.dir + req.path.replace(basePath.replace(/\/$/, ""), "")), (err, data) => {
