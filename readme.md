@@ -5,6 +5,8 @@ A simple configurable static http and https server powered by Express.js,support
 
 ## Change logs
 ```
+v1.4.7:
+Added preventing git config files stealing attack;
 v1.4.3:
 Proxy bug fixed; 
 v1.4.2: 

@@ -40,6 +40,10 @@ app.all('*', function (req, res) {
         console.warn(chalk.yellowBright("Directory traversal attack detected! From ip: " + req.ip + ",URL: " + req.protocol + "://" + host + req.originalUrl));
         return;
     }
+    if (req.originalUrl.includes("/.git")) {
+        console.warn(chalk.yellowBright("Git config file stealing attack detected! From ip: " + req.ip + ",URL: " + req.protocol + "://" + host + req.originalUrl));
+        return;
+    }
     if (!host) {
         console.warn(chalk.yellowBright("Bad request with no host header,from ip: " + req.ip + ",URL: " + req.protocol + "://" + host + req.originalUrl));
         res.status(400).send("Bad Request");
@@ -64,7 +68,7 @@ app.all('*', function (req, res) {
                 }
             };
             if (site.log || site.log === undefined) {
-                console.log(chalk.greenBright(new Date().toLocaleString() + ", Got request from ip " + req.ip + ", URL: " + req.protocol + "://" + host + req.originalUrl));
+                console.log(chalk.green(new Date().toLocaleString() + ", Got request from ip " + req.ip + ", URL: " + req.protocol + "://" + host + req.originalUrl));
             }
             let basePath = site.basePath || "/";
             if (site.domains.includes(req.hostname) && (new RegExp("^" + basePath.replace(/\/$/, "") + "\/").test(req.path) || req.path == basePath || req.path == basePath.replace(/\/$/, ""))) {
