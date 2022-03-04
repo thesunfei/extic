@@ -85,8 +85,8 @@ app.all('*', function (req, res) {
                                 requestClient = https;
                             }
                             delete req.headers.host;
-                            // console.log(req.body);
-                            let proxyRequet = requestClient.request(proxy.url + req.originalUrl, {
+                            let proxyURL = proxy.url + req.originalUrl.replace(proxy.path, proxy.replace === undefined ? "$&" : proxy.replace);
+                            let proxyRequet = requestClient.request(proxyURL, {
                                 method: req.method,
                                 headers: req.headers
                             }, r => {
@@ -100,7 +100,7 @@ app.all('*', function (req, res) {
                                 })
                                 r.on('end', () => {
                                     res.end();
-                                    console.log(chalk.green("Proxy operation finished."));
+                                    console.log(chalk.green("Proxy operation finished.URL:" + proxyURL));
                                 })
                                 r.on('error', e => {
                                     res.end();

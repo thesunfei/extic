@@ -5,6 +5,8 @@ A simple configurable static http and https server powered by Express.js,support
 
 ## Change logs
 ```
+v1.4.8:
+Added replace function for proxy;
 v1.4.7:
 Added preventing git config files stealing attack;
 v1.4.3:
@@ -46,11 +48,13 @@ module.exports = {
                 },
                 proxy: [{
                         path: /^(\/admin\/api|\/admin\/expand)/,
-                        url: "https://www.google.com"
+                        url: "https://www.google.com",
+                        replace: "" //The matched substring of request url will be replace by this value,the usage is the same as String.replace,in this example,if the request path was "/admin/abcd",the actual request url will be "https://google.com/abcd".Default is "$&"
                     },
                     {
                         path: /^(\/admin\/test1|\/admin\/test2)/,
-                        url: "https://www.bing.com"
+                        url: "https://www.bing.com",
+                        replace: function(match){return match+"/"+match}
                 }],
                 log:true //Whether to output user visit logs in console.Default is true.
             },
