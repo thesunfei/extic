@@ -1,6 +1,6 @@
 {
   "name": "extic",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "description": "A simple configurable static http and https server powered by Express.js",
   "main": "./bin/index.js",
   "preferGlobal": true,
@@ -16,10 +16,11 @@
   },
   "license": "MIT",
   "dependencies": {
+    "chalk": "^4.1.0",
     "express": "^4.17.1",
+    "http-proxy": "^1.18.1",
     "mime": "^2.4.4",
-    "yargs": "^15.0.2",
-    "chalk": "^4.1.0"
+    "yargs": "^15.0.2"
   },
   "homepage": "https://github.com/thesunfei/extic",
   "repository": {

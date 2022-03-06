@@ -5,10 +5,10 @@ const mime = require('mime');
 const yargs = require('yargs');
 const path = require('path');
 const chalk = require('chalk');
-const os = require('os');
 const express = require('express');
 const http = require('http');
 const https = require('https');
+const httpProxy = require('http-proxy');
 const options = yargs
     .usage('Usage: -c <config>')
     .option('c', {
@@ -29,9 +29,9 @@ try {
 }
 const app = express();
 app.use(express.json());
-app.use(express.urlencoded({
-    extended: true
-}));
+const proxyServer = httpProxy.createProxyServer({
+    ignorePath: true
+});
 app.all('*', function (req, res) {
     var port;
     var host = req.get("host");
@@ -78,39 +78,33 @@ app.all('*', function (req, res) {
                     }
                     for (let proxy of site.proxy) {
                         if (proxy.path.test(req.path)) {
-                            let requestClient;
-                            if (/^http:/i.test(proxy.url)) {
-                                requestClient = http;
-                            } else if (/^https:/i.test(proxy.url)) {
-                                requestClient = https;
-                            }
-                            delete req.headers.host;
                             let proxyURL = proxy.url + req.originalUrl.replace(proxy.path, proxy.replace === undefined ? "$&" : proxy.replace);
-                            let proxyRequet = requestClient.request(proxyURL, {
-                                method: req.method,
-                                headers: req.headers
-                            }, r => {
-                                r.rawHeaders.forEach((item, index) => {
-                                    if (index % 2 == 0) {
-                                        res.append(item, r.rawHeaders[index + 1])
+                            let proxyURLObj = new URL(proxyURL);
+                            proxyServer.web(req, res, {
+                                target: proxyURL,
+                                headers: {
+                                    ...req.headers,
+                                    host: proxyURLObj.host,
+                                    origin: proxyURLObj.origin,
+                                    referer: proxyURLObj.origin,
+                                    followRedirects: true
+                                },
+                                ignorePath: true
+                            });
+                            proxyServer.on("proxyReq", function (proxyReq, req) {
+                                console.log(chalk.cyan('Proxy Requested.URL:' + proxyURL));
+                                if (req.body && Object.keys(req.body).length > 0) {
+                                    let bodyData = req.body;
+                                    if (typeof bodyData == "object") {
+                                        bodyData = JSON.stringify(bodyData)
                                     }
-                                })
-                                r.on('data', dt => {
-                                    res.write(dt);
-                                })
-                                r.on('end', () => {
-                                    res.end();
-                                    console.log(chalk.green("Proxy operation finished.URL:" + proxyURL));
-                                })
-                                r.on('error', e => {
-                                    res.end();
-                                    // console.log(e)
-                                })
+                                    proxyReq.write(bodyData);
+                                }
                             })
-                            if (req.method.toLowerCase() !== "get") {
-                                proxyRequet.write(JSON.stringify(req.body));
-                            }
-                            proxyRequet.end();
+                            proxyServer.once("error", function (e) {
+                                console.log(chalk.red("Proxy Failed [" + e.code + "].URL:" + proxyURL));
+                                res.status(502).send('Bad Gateway');
+                            })
                             matched = true;
                             return
                         }
