@@ -86,10 +86,11 @@ app.all('*', function (req, res) {
                                     ...req.headers,
                                     host: proxyURLObj.host,
                                     origin: proxyURLObj.origin,
-                                    referer: proxyURLObj.origin,
-                                    followRedirects: true
+                                    referer: proxyURLObj.origin
                                 },
-                                ignorePath: true
+                                ignorePath: true,
+                                followRedirects: true,
+                                ...proxy.options
                             });
                             proxyServer.on("proxyReq", function (proxyReq, req) {
                                 console.log(chalk.cyan('Proxy Requested.URL:' + proxyURL));

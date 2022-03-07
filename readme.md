@@ -31,9 +31,13 @@ module.exports = {
                     test:"test"
                 },
                 proxy: [{
-                        path: /^(\/admin\/api|\/admin\/expand)/,
+                        path: /^(\/admin|\/api)/,
                         url: "https://www.google.com",
-                        replace: "" //The matched substring of request url will be replaced by this value,the usage is the same as String.replace.In this example,if the request path was "/admin/abcd",the actual request url will be "https://google.com/abcd".Default is "$&"
+                        replace: "", //The matched substring of request url will be replaced by this value,the usage is the same as String.replace.In this example,if the request path was "/admin/abcd",the actual request url will be "https://google.com/abcd".Default is "$&"
+                        options:{ //See https://github.com/http-party/node-http-proxy#options for this usage.
+                            followRedirects:true,//Default:true
+                            ignorePath:true //Default:true
+                        }
                     },
                     {
                         path: /^(\/admin\/test1|\/admin\/test2)/,
@@ -78,6 +82,8 @@ module.exports = {
 
 ## Change logs
 ```
+v1.4.11:
+Add options for proxy;
 v1.4.10:
 Fixed proxy crash issue and changed line endings to lf;
 v1.4.9:
