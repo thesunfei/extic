@@ -3,24 +3,6 @@
 A simple configurable static http and https server powered by Express.js,supported proxy, custom headers and frontend router.
 ```
 
-## Change logs
-```
-v1.4.9:
-File upload for proxy supported;
-v1.4.8:
-Added replace function for proxy;
-v1.4.7:
-Added preventing git config files stealing attack;
-v1.4.3:
-Proxy bug fixed; 
-v1.4.2: 
-Colorful console output supported;
-Relative path for config file and server files supported;
-Custom headers supported;
-Log is now enabled by default;
-
-```
-
 ## Install
 ```
 npm i -g extic
@@ -92,4 +74,24 @@ module.exports = {
         port: 443
     }]
 }
+```
+
+## Change logs
+```
+v1.4.10:
+Fixed proxy crash issue and changed line endings to lf;
+v1.4.9:
+File upload for proxy supported;
+v1.4.8:
+Added replace function for proxy;
+v1.4.7:
+Added preventing git config files stealing attack;
+v1.4.3:
+Proxy bug fixed; 
+v1.4.2: 
+Colorful console output supported;
+Relative path for config file and server files supported;
+Custom headers supported;
+Log is now enabled by default;
+
 ```

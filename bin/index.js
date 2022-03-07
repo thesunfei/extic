@@ -93,7 +93,7 @@ app.all('*', function (req, res) {
                             });
                             proxyServer.on("proxyReq", function (proxyReq, req) {
                                 console.log(chalk.cyan('Proxy Requested.URL:' + proxyURL));
-                                if (req.body && Object.keys(req.body).length > 0) {
+                                if (req.body && Object.keys(req.body).length > 0 && req.complete) {
                                     let bodyData = req.body;
                                     if (typeof bodyData == "object") {
                                         bodyData = JSON.stringify(bodyData)
@@ -101,9 +101,11 @@ app.all('*', function (req, res) {
                                     proxyReq.write(bodyData);
                                 }
                             })
-                            proxyServer.once("error", function (e) {
+                            proxyServer.on("error", function (e) {
                                 console.log(chalk.red("Proxy Failed [" + e.code + "].URL:" + proxyURL));
-                                res.status(502).send('Bad Gateway');
+                                if (!req.complete) {
+                                    res.status(502).send('Bad Gateway');
+                                }
                             })
                             matched = true;
                             return
