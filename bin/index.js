@@ -135,6 +135,7 @@ app.all('*', function (req, res) {
         });
     }
     if (!matched) {
+        console.warn(chalk.yellowBright(new Date().toLocaleString() +", No matched domain found. " + req.ip + ",URL: " + req.protocol + "://" + host + req.originalUrl));
         res.type('html');
         res.status(406).send('Not Acceptable');
     }
