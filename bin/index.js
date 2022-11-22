@@ -8,6 +8,7 @@ const chalk = require('chalk');
 const express = require('express');
 const http = require('http');
 const https = require('https');
+const tls = require('node:tls');
 const httpProxy = require('http-proxy');
 const options = yargs
     .usage('Usage: -c <config>')
@@ -135,7 +136,7 @@ app.all('*', function (req, res) {
         });
     }
     if (!matched) {
-        console.warn(chalk.yellowBright(new Date().toLocaleString() +", No matched domain found. " + req.ip + ",URL: " + req.protocol + "://" + host + req.originalUrl));
+        console.warn(chalk.yellowBright(new Date().toLocaleString() + ", No matched domain found or base path mismatched. " + req.ip + ",URL: " + req.protocol + "://" + host + req.originalUrl));
         res.type('html');
         res.status(406).send('Not Acceptable');
     }
@@ -146,6 +147,20 @@ config.ports.forEach(port => {
             http.createServer(app).listen(port.port);
         } else if ((port.protocol || "").toLowerCase().trim() == "https") {
             https.createServer({
+                SNICallback(domain, cb){
+                    let site = port.sites.find(v => v.domains.includes(domain));
+                    if (site) {
+                        cb(null, tls.createSecureContext({
+                            key: fs.readFileSync(path.resolve(configDir, site.cert.key)),
+                            cert: fs.readFileSync(path.resolve(configDir, site.cert.cert || site.cert.crt))
+                        }))
+                    } else {
+                        cb(null, tls.createSecureContext({
+                            key: fs.readFileSync(path.resolve(configDir, port.cert.key)),
+                            cert: fs.readFileSync(path.resolve(configDir, port.cert.cert || port.cert.crt))
+                        }))
+                    }
+                },
                 key: fs.readFileSync(path.resolve(configDir, port.cert.key)),
                 cert: fs.readFileSync(path.resolve(configDir, port.cert.cert || port.cert.crt))
             }, app).listen(port.port);

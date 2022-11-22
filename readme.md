@@ -61,17 +61,25 @@ module.exports = {
                 domains: ["test3.com", "www.test3.com"],
                 dir: "./web/test3",
                 basePath:"/admin",
-                index: "index.html"
+                index: "index.html",
+                cert: {
+                    key: "../certs/test3.key", //The path is relative to the directory of the config file
+                    cert: "/home/certs/test3.crt"
+                }
             },
             {
                 name: "test2",
                 domains: ["test4.com", "www.test4.com"],
                 dir: "/home/web/test4",
-                index: "index.html"
+                index: "index.html",
+                cert: {
+                    key: "../certs/test4.key", //The path is relative to the directory of the config file
+                    cert: "/home/certs/test4.crt"
+                }
             }
         ],
         protocol: "https",
-        cert: {
+        cert: {//Required，this is the fallback cert if no matched domain found;
             key: "../certs/web.key", //The path is relative to the directory of the config file
             cert: "/home/certs/web.crt"
         },
@@ -82,22 +90,7 @@ module.exports = {
 
 ## Change logs
 ```
-v1.4.11:
-Add options for proxy;
-v1.4.10:
-Fixed proxy crash issue and changed line endings to lf;
-v1.4.9:
-File upload for proxy supported;
-v1.4.8:
-Added replace function for proxy;
-v1.4.7:
-Added preventing git config files stealing attack;
-v1.4.3:
-Proxy bug fixed; 
-v1.4.2: 
-Colorful console output supported;
-Relative path for config file and server files supported;
-Custom headers supported;
-Log is now enabled by default;
+v1.4.15:
+Supported different SSL certs for different domains.
 
 ```
