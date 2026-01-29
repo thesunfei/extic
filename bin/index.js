@@ -36,8 +36,14 @@ app.use(express.json());
 // 初始化安全模块
 const security = new SecurityManager({
     dataDir: path.join(configDir, '.extic'),
-    notFoundThreshold: config.security?.notFoundThreshold || 10,
-    timeWindow: config.security?.timeWindow || 60000,
+    // 扫描检测配置
+    scanThreshold: config.security?.scanThreshold || 20,
+    scanTimeWindow: config.security?.scanTimeWindow || 60000,
+    // 登录限制配置
+    loginMaxAttempts: config.security?.loginMaxAttempts || 5,
+    loginWindowMs: config.security?.loginWindowMs || 10 * 60 * 1000,
+    loginLockoutMs: config.security?.loginLockoutMs || 60 * 60 * 1000,
+    // 管理面板配置
     adminPath: config.security?.adminPath || '/__extic_admin__',
     adminPassword: config.security?.adminPassword || null,
     whitelist: config.security?.whitelist || ['127.0.0.1', '::1', '::ffff:127.0.0.1']
@@ -134,8 +140,13 @@ app.all('*', function (req, res) {
 
                 }
                 matched = true;
-                fs.readFile(path.resolve(configDir, site.dir + req.path.replace(basePath.replace(/\/$/, ""), "")), (err, data) => {
+                const requestedFile = path.resolve(configDir, site.dir + req.path.replace(basePath.replace(/\/$/, ""), ""));
+                fs.readFile(requestedFile, (err, data) => {
                     if (err) {
+                        // 文件不存在，记录可疑请求（用于扫描检测）
+                        security.recordSuspiciousRequest(req, false);
+                        
+                        // 前端路由：返回首页
                         fs.readFile(path.resolve(configDir, site.dir + "/" + site.index), (err, data) => {
                             if (err) {
                                 res.type('html');
@@ -146,7 +157,7 @@ app.all('*', function (req, res) {
                             }
                         });
                     } else {
-                        res.type(mime.getType(path.resolve(configDir, site.dir + "/" + req.path)) || "text/plain");
+                        res.type(mime.getType(requestedFile) || "text/plain");
                         res.send(data);
                     }
                 });
@@ -165,7 +176,7 @@ config.ports.forEach(port => {
             http.createServer(app).listen(port.port);
         } else if ((port.protocol || "").toLowerCase().trim() == "https") {
             https.createServer({
-                SNICallback(domain, cb) {
+                SNICallback(domain, cb){
                     let site = port.sites.find(v => v.domains.includes(domain));
                     if (site && site.cert) {
                         cb(null, tls.createSecureContext({
