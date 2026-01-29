@@ -1,6 +1,6 @@
 {
   "name": "extic",
-  "version": "1.4.15",
+  "version": "1.5.0",
   "description": "A simple configurable static http and https server powered by Express.js",
   "main": "./bin/index.js",
   "preferGlobal": true,
