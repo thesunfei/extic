@@ -10,6 +10,8 @@ const http = require('http');
 const https = require('https');
 const tls = require('node:tls');
 const httpProxy = require('http-proxy');
+const SecurityManager = require('./security');
+
 const options = yargs
     .usage('Usage: -c <config>')
     .option('c', {
@@ -30,6 +32,22 @@ try {
 }
 const app = express();
 app.use(express.json());
+
+// 初始化安全模块
+const security = new SecurityManager({
+    dataDir: path.join(configDir, '.extic'),
+    notFoundThreshold: config.security?.notFoundThreshold || 10,
+    timeWindow: config.security?.timeWindow || 60000,
+    adminPath: config.security?.adminPath || '/__extic_admin__',
+    adminPassword: config.security?.adminPassword || null,
+    whitelist: config.security?.whitelist || ['127.0.0.1', '::1', '::ffff:127.0.0.1']
+});
+
+// 应用安全中间件
+app.use(security.middleware());
+
+console.log(chalk.cyan(`[Security] 管理面板: http://localhost:<port>${security.config.adminPath}`));
+
 const proxyServer = httpProxy.createProxyServer({
     ignorePath: true
 });
