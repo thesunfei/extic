@@ -165,9 +165,9 @@ config.ports.forEach(port => {
             http.createServer(app).listen(port.port);
         } else if ((port.protocol || "").toLowerCase().trim() == "https") {
             https.createServer({
-                SNICallback(domain, cb){
+                SNICallback(domain, cb) {
                     let site = port.sites.find(v => v.domains.includes(domain));
-                    if (site) {
+                    if (site && site.cert) {
                         cb(null, tls.createSecureContext({
                             key: fs.readFileSync(path.resolve(configDir, site.cert.key)),
                             cert: fs.readFileSync(path.resolve(configDir, site.cert.cert || site.cert.crt))
